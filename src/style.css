@@ -1,0 +1,141 @@
+/**
+ * Styles for Axiell Collections Update Remote Action
+ */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.intro {
+    border-bottom: 2px solid #0066cc;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.intro h2 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 20px;
+}
+
+.intro p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.progress-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #0066cc;
+    margin: 10px 0 0 0;
+}
+
+.loading {
+    display: inline-block;
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+.error-message {
+    background-color: #fee;
+    border: 1px solid #c00;
+    color: #c00;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.assets-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.assets-container h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.result-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #fafafa;
+}
+
+.result-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.success-item {
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+}
+
+.error-item {
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+}
+
+.result-item strong {
+    color: #333;
+}
+
+.info-box {
+    display: none;
+    padding: 15px;
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    border-radius: 4px;
+    color: #1565c0;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+/* Scrollbar styling */
+.result-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.result-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.result-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

@@ -1,0 +1,14 @@
+# Changelog
+
+## Version 1.0.0 (2026-03-31)
+
+### Initial Release
+- Created external action plugin based on original adlib_update_action
+- Built with TypeScript and webpack
+- Uses @woodwing/assets-client-sdk for WoodWing Assets integration
+- Displays selected assets count and processing progress
+- Shows success/error status for each asset
+- Updates cf_acStatus to "Metadata update requested"
+- Resets cf_acTimestamp to trigger sync process
+- Validates assets have cf_acRecordId before processing
+- Configurable server URL whitelist for security
