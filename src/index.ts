@@ -1,4 +1,4 @@
-import { AssetsApiClient, AssetsPluginContext } from '@woodwing/assets-client-sdk';
+import { Assets10Client } from '@woodwing/a10-client-sdk';
 import './style.css';
 
 // Config will be loaded dynamically at runtime
@@ -10,8 +10,7 @@ const introDiv = document.getElementById('intro');
 const assetsContainer = document.getElementById('assetsContainer');
 const infoDiv = document.getElementById('info');
 
-let apiClient: AssetsApiClient;
-let contextService: AssetsPluginContext;
+let client: Assets10Client;
 let selectedAssets: any[] = [];
 let processedCount = 0;
 let totalCount = 0;
@@ -33,28 +32,43 @@ async function initialize() {
   await loadConfig();
   
   try {
-    // Initialize the Assets SDK using static methods
-    // Timeout for Assets SDK connection
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Timeout: Not embedded in WoodWing Assets'));
-      }, 5000);
-    });
+    // Log environment information
+    console.log('=== Plugin Initialization ===');
+    console.log('Current URL:', window.location.href);
+    console.log('Is in iframe:', window !== window.parent);
     
-    const contextPromise = AssetsPluginContext.get(config?.CLIENT_URL_WHITELIST || []);
+    // Initialize the Assets 10 SDK with debug enabled
+    console.log('Calling Assets10Client.bootstrap()...');
+    const bootstrapStart = Date.now();
     
-    contextService = await Promise.race([
-      contextPromise,
-      timeoutPromise
-    ]) as AssetsPluginContext;
+    try {
+      client = await Assets10Client.bootstrap({
+        debug: true,
+        handshakeTimeoutMs: 10000,
+        requestTimeoutMs: 15000
+      });
+      
+      const elapsed = Date.now() - bootstrapStart;
+      console.log(`✅ Assets10Client.bootstrap() completed in ${elapsed}ms`);
+      console.log('Client initialized:', client);
+    } catch (bootstrapError: any) {
+      const elapsed = Date.now() - bootstrapStart;
+      console.error(`Assets10Client.bootstrap() failed after ${elapsed}ms`);
+      console.error('Bootstrap error:', bootstrapError);
+      
+      if (bootstrapError?.code === 'handshake_timeout') {
+        throw new Error('Handshake timeout: Plugin configuration might be incorrect. Make sure the plugin is added as an "Action Plugin" in Management Console.');
+      }
+      throw bootstrapError;
+    }
     
-    console.log('Plugin context initialized');
-    
-    // Create API client from context
-    apiClient = AssetsApiClient.fromPluginContext(contextService);
+    // Get plugin context
+    const context = client.getPluginContext();
+    console.log('Plugin context:', context);
     
     // Get selected assets
-    const selection = contextService.context.activeTab.assetSelection;
+    const selection = context.app.assetSelection;
+    console.log('Asset selection:', selection);
     
     if (!selection || selection.length === 0) {
       showError('Geen beeld geselecteerd, selecteer minimaal 1 beeld');
@@ -71,8 +85,33 @@ async function initialize() {
     await processAssets();
     
   } catch (error: any) {
-    console.error('Initialization error:', error);
-    showError(`Initialization failed: ${error.message || error}`);
+    console.error('=== Initialization Error ===');
+    console.error('Error type:', error?.constructor?.name || typeof error);
+    console.error('Error message:', error?.message);
+    console.error('Error stack:', error?.stack);
+    console.error('Full error:', error);
+    
+    let errorMessage = 'Initialization failed';
+    
+    // Handle different error types
+    if (error?.code === 'handshake_timeout') {
+      errorMessage = `<strong>Handshake Timeout</strong><br><br>
+        De plugin kan geen verbinding maken met WoodWing Assets.<br><br>
+        <strong>Mogelijke oorzaken:</strong><br>
+        • Plugin is niet correct geconfigureerd in Management Console<br>
+        • Plugin moet worden toegevoegd als "Action Plugin", niet als "Panel Plugin"<br>
+        • URL in plugin configuratie is niet correct<br><br>
+        <strong>Configuratie vereisten:</strong><br>
+        • Type: <em>Action Plugin</em><br>
+        • URL: <code>https://rbuikman.github.io/adlib_update_action_remote/index.html</code><br>
+        • Location: Asset context menu / Toolbar<br>`;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    
+    showError(errorMessage);
   }
 }
 
@@ -101,26 +140,24 @@ async function processAsset(asset: any, resultList: HTMLElement | null) {
   try {
     // Check if asset has AC record ID
     if (!asset.metadata.cf_acRecordId) {
-      addResult(resultList, asset.name, 'heeft geen AC record nummer', 'error');
+      addResult(resultList, asset.metadata.name || asset.id, 'heeft geen AC record nummer', 'error');
       return;
     }
     
-    // Update metadata
+    // Update metadata using A10 SDK
     const metadata = {
       cf_acStatus: 'Metadata update requested',
       cf_acTimestamp: '1970-01-01T00:00:00'
     };
     
-    await apiClient.update(asset.id, {
-      metadata: JSON.stringify(metadata)
-    });
+    await client.updateBulkById([asset.id], metadata);
     
-    addResult(resultList, asset.name, 'klaargezet voor metadata update', 'success');
+    addResult(resultList, asset.metadata.name || asset.id, 'klaargezet voor metadata update', 'success');
     
   } catch (error: any) {
     console.error('Error updating asset:', error);
     const errorMsg = error.message || error.data?.message || 'Update failed';
-    addResult(resultList, asset.name, errorMsg, 'error');
+    addResult(resultList, asset.metadata.name || asset.id, errorMsg, 'error');
   }
 }
 
