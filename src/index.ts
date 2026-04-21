@@ -29,15 +29,13 @@ async function loadConfig() {
 
 // Initialize the plugin
 async function initialize() {
-  await loadConfig();
-  
   try {
     // Log environment information
     console.log('=== Plugin Initialization ===');
     console.log('Current URL:', window.location.href);
     console.log('Is in iframe:', window !== window.parent);
     
-    // Initialize the Assets 10 SDK with debug enabled
+    // Initialize the Assets 10 SDK with debug enabled - DO THIS FIRST!
     console.log('Calling Assets10Client.bootstrap()...');
     const bootstrapStart = Date.now();
     
@@ -61,6 +59,9 @@ async function initialize() {
       }
       throw bootstrapError;
     }
+    
+    // Load config after bootstrap (not blocking the handshake)
+    await loadConfig();
     
     // Get plugin context
     const context = client.getPluginContext();
