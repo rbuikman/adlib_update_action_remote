@@ -1,11 +1,6 @@
 import { Assets10Client } from '@woodwing/a10-client-sdk';
 import './style.css';
 
-// Config will be loaded dynamically at runtime
-let config: {
-  CLIENT_URL_WHITELIST: string[];
-} | null = null;
-
 const introDiv = document.getElementById('intro');
 const assetsContainer = document.getElementById('assetsContainer');
 const infoDiv = document.getElementById('info');
@@ -14,18 +9,6 @@ let client: Assets10Client;
 let selectedAssets: any[] = [];
 let processedCount = 0;
 let totalCount = 0;
-
-// Load configuration
-async function loadConfig() {
-  try {
-    const response = await fetch('./config.json');
-    config = await response.json();
-    console.log('Config loaded:', config);
-  } catch (error) {
-    console.error('Failed to load config:', error);
-    showError('Failed to load configuration');
-  }
-}
 
 // Initialize the plugin
 async function initialize() {
@@ -59,9 +42,6 @@ async function initialize() {
       }
       throw bootstrapError;
     }
-    
-    // Load config after bootstrap (not blocking the handshake)
-    await loadConfig();
     
     // Get plugin context
     const context = client.getPluginContext();

@@ -1,7 +1,0 @@
-{
-    "CLIENT_URL_WHITELIST": [
-        "https://musea-assets.woodwing.cloud",
-        "https://shared-poc-dam.qonqord.cloud",
-        "http://localhost:8080"
-    ]
-}
