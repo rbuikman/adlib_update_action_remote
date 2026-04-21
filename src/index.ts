@@ -78,8 +78,7 @@ async function initialize() {
     selectedAssets = selection;
     totalCount = selectedAssets.length;
     
-    introDiv!.innerHTML = `<h2>Update metadata van Axiell Collections</h2>
-                           <p>${totalCount} asset(s) geselecteerd</p>`;
+    introDiv!.innerHTML = `<p>${totalCount} asset(s) geselecteerd</p>`;
     
     // Start processing
     await processAssets();
